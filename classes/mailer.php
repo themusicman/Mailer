@@ -67,7 +67,7 @@ class Mailer {
 	 * 
 	 **/
 	
-	public function connect($config=NULL) 
+	public function connect($config = NULL) 
 	{
 		if ( ! class_exists('Swift', FALSE))
 		{
@@ -87,9 +87,9 @@ class Mailer {
 				
 				//Create the Transport
 				$transport = Swift_SmtpTransport::newInstance()
-					->setHost($options['hostname'])
-					->setUsername($options['username'])
-					->setPassword($options['password']);
+								->setHost($options['hostname'])
+								->setUsername($options['username'])
+								->setPassword($options['password']);
 				
 				//Port?
 				$port = empty($options['port']) ? NULL : (int) $options['port'];
@@ -100,9 +100,6 @@ class Mailer {
 				{
 					$transport->setEncryption($options['encryption']);
 				}
-
-				// Set the timeout to 5 seconds
-				//$transport->setTimeout(empty($options['timeout']) ? 5 : (int) $options['timeout']);
 				
 			break;
 			
@@ -119,10 +116,8 @@ class Mailer {
 			break;
 		}
 
-		
 		//Create the Mailer using your created Transport
 		return $this->_mailer = Swift_Mailer::newInstance($transport);
-		
 	}
 	
 	
@@ -149,22 +144,19 @@ class Mailer {
 				//call the method
 				$this->$method($args);
 				
-				$this->setup($method);
+				//setup the message
+				$this->setup_message($method);
 				
+				//send the message
 				$this->send();
-				
 			}
 			else
 			{
 				//the method does not exist so throw exception
 				throw new Exception('Method: '.$method.' does not exist.');
 			}
-		}
-		
-		
+		}		
 	}
-	
-	
 	
 	
 	/**
@@ -176,7 +168,7 @@ class Mailer {
 	 * 
 	 **/
 	
-	public function setup($method) 
+	public function setup_message($method) 
 	{
 		// Create the message
 		$this->message = Swift_Message::newInstance();
@@ -187,10 +179,15 @@ class Mailer {
 		//do we need to process the HTML?
 		if ($this->message_type == 'text/html' OR $this->message_type == 'multipart/alternative')
 		{
-			//find the messsage view
-			$base_dir = strtolower(preg_replace('/_/', '/', $this->_class_name));
-			$this->body_html = new View($base_dir.'/'.$method);
-
+			
+			if ($this->body_html === NULL)
+			{
+				//find the messsage view
+				$base_dir = strtolower(preg_replace('/_/', '/', $this->_class_name));
+				$this->body_html = new View($base_dir.'/'.$method);
+				
+			}
+			
 			//add the body data to it
 			if (is_array($this->body_data))
 			{
@@ -199,6 +196,7 @@ class Mailer {
 					$this->body_html->bind($variable, $data);
 				}
 			}
+			
 			$this->body_html = $this->body_html->render();
 			
 			$this->message->setBody($this->body_html, 'text/html');
@@ -239,7 +237,6 @@ class Mailer {
 		}
 		
 		$this->message->setTo($this->to);
-
 
 		//set the cc field		
 		if ($this->cc !== NULL)
@@ -334,7 +331,7 @@ class Mailer {
 	
 	public function set_mailer($mailer) 
 	{
-		if ($mailer instanceof Swift)
+		if ($mailer instanceof Swift_Mailer)
 		{
 			$this->_mailer = $mailer;
 		}
