@@ -15,7 +15,7 @@ return array
 );
 
 
-2. Create a class that extends to Mailer class and save it to /classes/mailer/class_name.php (Minus the Mailer_)
+2. Create a class that extends the Mailer class and save it to /classes/mailer/class_name.php (Minus the Mailer_)
 
 
 <?php defined('SYSPATH') or die('No direct script access.');
