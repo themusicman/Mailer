@@ -78,7 +78,7 @@ class Mailer {
 		// Load default configuration
 		($config === NULL) and $config = Kohana::config('mailer');
 		
-		//get the configurations
+		//get the configuration options
 		$options = $config->options;
 		
 		switch ($config->transport)
@@ -116,7 +116,7 @@ class Mailer {
 			break;
 		}
 
-		//Create the Mailer using your created Transport
+		//Create the Mailer using the appropriate transport
 		return $this->_mailer = Swift_Mailer::newInstance($transport);
 	}
 	
@@ -179,13 +179,12 @@ class Mailer {
 		//do we need to process the HTML?
 		if ($this->message_type == 'text/html' OR $this->message_type == 'multipart/alternative')
 		{
-			
+			//has it already been set?
 			if ($this->body_html === NULL)
 			{
 				//find the messsage view
 				$base_dir = strtolower(preg_replace('/_/', '/', $this->_class_name));
 				$this->body_html = new View($base_dir.'/'.$method);
-				
 			}
 			
 			//add the body data to it
@@ -258,6 +257,7 @@ class Mailer {
 			$this->message->setBcc($this->bcc);
 		}
 		
+		//who is it from?
 		$this->message->setFrom($this->from);
 		
 	}
