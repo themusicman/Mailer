@@ -1,24 +1,21 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * SwiftMailer driver, used with the email helper.
+ * SwiftMailer transports
  *
- * @see http://www.swiftmailer.org/wikidocs/v3/connections/nativemail
- * @see http://www.swiftmailer.org/wikidocs/v3/connections/sendmail
- * @see http://www.swiftmailer.org/wikidocs/v3/connections/smtp
+ * @see http://swiftmailer.org/docs/transport-types
  *
- * Valid drivers are: native, sendmail, smtp
- */
-
-/**
+ * Valid transports are: smtp, native, sendmail
+ *
  * To use secure connections with SMTP, set "port" to 465 instead of 25.
  * To enable TLS, set "encryption" to "tls".
+ * To enable SSL, set "encryption" to "ssl".
  *
- * Driver options:
- * @param   null    native: no options
- * @param   string  sendmail: executable path, with -bs or equivalent attached
- * @param   array   smtp: hostname, (username), (password), (port), (auth), (encryption)
+ * Transport options:
+ * @param   null  	native: no options
+ * @param   string  sendmail: 
+ * @param   array   smtp: hostname, username, password, port, encryption (optional)
+ *
  */
-
 
 return array
 (
