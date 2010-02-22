@@ -192,7 +192,7 @@ class Mailer {
 			{
 				foreach ($this->body_data as $variable => $data) 
 				{
-					$this->body_html->bind($variable, $data);
+					$this->body_html->bind($variable, $this->body_data[$variable]);
 				}
 			}
 			
