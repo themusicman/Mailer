@@ -148,7 +148,7 @@ class Mailer {
 				$this->setup_message($method);
 				
 				//send the message
-				$this->send();
+				return $this->send();
 			}
 			else
 			{
