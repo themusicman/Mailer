@@ -72,7 +72,9 @@ class Mailer {
 	* Mailer Config
 	* @var object
 	*/
-    protected $config = null;
+    protected $config = "default";
+
+    protected $method = NULL;
 	
 	public static $instances = array();
 
@@ -84,13 +86,39 @@ class Mailer {
         'html' => null,
         'text' => null,
     );
+
+	/**
+	 * Automatically executed before the controller action. Can be used to set
+	 * class properties, do authorization checks, and execute other custom code.
+	 *
+	 * @return  void
+	 */
+	public function before()
+	{
+		// Nothing by default
+	}
+
+	/**
+	 * Automatically executed after the controller action. Can be used to apply
+	 * transformation to the request response, add extra output, and execute
+	 * other custom code.
+	 *
+	 * @return  void
+	 */
+	public function after()
+	{
+		// Nothing by default
+	}
 	
 	public function __construct($config = "default")
     {
+		if ( ! class_exists('Swift', FALSE))
+		{
+			// Load SwiftMailer Autoloader
+			require_once Kohana::find_file('vendor', 'swift/swift_required');
+		};
 		// Load configuration
-		$this->config = Kohana::config('mailer.'.$config);
-
-		$this->connect( $config );
+		$this->before();
     }
 	
 	/**
@@ -102,9 +130,9 @@ class Mailer {
 	 * 
 	 **/
 	
-	public static function factory( $mailer_name, $method = NULL, $data = array() )
+	public static function factory( $mailer_name = NULL, $method = NULL, $data = array() )
 	{
-		$class = 'Mailer_'.ucfirst($mailer_name);
+		$class = ( $mailer_name = NULL ) ? 'Mailer_'.ucfirst($mailer_name) : 'Mailer';
 		$class = new $class;
 		
 		if ( $method === NULL )
@@ -148,9 +176,10 @@ class Mailer {
 	 * 
 	 **/
 	
-	public static function instance( $mailer_name ) 
+	public static function instance( $mailer_name = NULL ) 
 	{
-		$className = 'Mailer_'.ucfirst($mailer_name);
+		$className = ( $mailer_name !== NULL) ? 'Mailer_'.ucfirst($mailer_name) : "Mailer";
+		
 		if ( ! isset( self::$instances[$className] ) )
 		{
 			self::$instances[$className] = new $className;
@@ -170,17 +199,8 @@ class Mailer {
 	
 	public function connect( $config = "default" ) 
 	{
-		if ( ! class_exists('Swift', FALSE))
-		{
-			// Load SwiftMailer Autoloader
-			require_once Kohana::find_file('vendor', 'swift/swift_required');
-		};
-
 		// Load configuration
-		if ( $config === "default" )
-		{
-			$config = $this->config OR Kohana::config('mailer.'.$config);
-		};
+		$config = Kohana::config('mailer.'.$config);
 
 		$transport = $config['transport'];
 		$config = $config['options'];
@@ -232,13 +252,23 @@ class Mailer {
 	 **/
 	public function __call($name, $args = array())
 	{
-		foreach ($args[0] as $key => $value)
+		$pattern = '/^(type|from|to|cc|bcc|subject|data|attachments|batch_send|config|html|text)$/i';
+		if ( isset($args[0]) && is_array( $args[0] ) )
 		{
-			if (preg_match('/^(type|from|to|cc|bcc|subject|data|attachments|batch_send|config)$/i', $key))
+			foreach ($args[0] as $key => $value)
 			{
-				$this->$key = $value;
-			}
-		}
+				if (preg_match($pattern, $key))
+				{
+					$this->$key = $value;
+				};
+			};
+		};
+		
+		if ( preg_match($pattern, $name) )
+		{
+			$this->$name = $args[0];
+			return $this;
+		};
 
 		if (preg_match('/^sen(d|t)_/i', $name))
 		{
@@ -247,13 +277,8 @@ class Mailer {
 			//see if the method exists	
 			if (method_exists($this, $method))
 			{
-				if ( ! empty( $args[0] ) )
-				{
-					$args = ( is_array( $args[0] ) ) ? ( (object) $args[0] ) : $args[0];
-				};
-				
 				//call the method
-				$this->$method( $args );
+				call_user_func_array(array($this, $method), $args);
 				
 				//setup the message
 				$this->setup_message($method);
@@ -278,31 +303,55 @@ class Mailer {
 	 * 
 	 **/
 	
-	public function setup_message($method) 
+	public function setup_message($method = NULL) 
 	{
 		$this->message = Swift_Message::newInstance();
         $this->message->setSubject($this->subject);
+		$is_html = isset( $this->html );
+		$is_text = isset( $this->text );
 
-        // View
-        $template = strtolower(preg_replace('/_/', '/', get_class($this)) . "/{$method}");
+		if ( $is_html || $is_text )
+		{
+			if ( $is_html )
+			{
+				$this->view["html"] = $this->html;
+				$this->message->setBody($this->view['html'], 'text/html');
+			};
+			if ( $is_text )
+			{
+				$this->view["text"] = $this->text;
+				if ( $is_html )
+				{
+					$this->message->addPart($this->view['text'], 'text/plain');
+				}
+				else
+				{
+					$this->message->setBody($this->view['text'], 'text/plain');
+				};
+			};
+		}
+		else
+		{
+			// View
+			$template = strtolower(preg_replace('/_/', '/', get_class($this)) . "/{$method}");
 
+			$text = View::factory($template);
+			$this->set_data($text);
+			$this->view['text'] = $text->render();
 		
-        $text = View::factory($template);
-        $this->set_data($text);
-		$this->view['text'] = $text->render();
-		
-        if ($this->type === 'html')
-        {
-            $template = View::factory( $template . "_text" );
-            $this->set_data( $template );
-			$this->view['html'] = $this->view['text'];
-			$this->view['text'] = $template->render();
+			if ($this->type === 'html')
+			{
+				$template = View::factory( $template . "_text" );
+				$this->set_data( $template );
+				$this->view['html'] = $this->view['text'];
+				$this->view['text'] = $template->render();
 
-            $this->message->setBody($this->view['html'], 'text/html');
-            $this->message->addPart($this->view['text'], 'text/plain');
-        } else {
-            $this->message->setBody($this->view['text'], 'text/plain');
-        }
+				$this->message->setBody($this->view['html'], 'text/html');
+				$this->message->addPart($this->view['text'], 'text/plain');
+			} else {
+				$this->message->setBody($this->view['text'], 'text/plain');
+			}
+		};
 
         if ($this->attachments !== null)
         {
@@ -361,6 +410,12 @@ class Mailer {
 	
 	public function send() 
 	{
+		if ( $this->message === NULL )
+		{
+			$this->setup_message();
+		};
+	
+		$this->connect( $this->config );
 		//should we batch send or not?
 		if ( ! $this->batch_send)
 		{
@@ -372,6 +427,7 @@ class Mailer {
 			$this->result = $this->_mailer->batchSend($this->message);
 		}
 		
+		$this->after();
 		return $this->result;
 	}
 

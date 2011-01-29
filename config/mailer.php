@@ -19,13 +19,15 @@
 
 return array
 (
-	'transport'	=> 'smtp',
-	'options'	=> array
-					(
-						'hostname'	=> 'thewebapp.com',
-						'username'	=> 'mailer@thewebapp.com',
-						'password'	=> 'p@ssw0rd',
-						'port'		=> '25',
-					),
+	'default' => array(
+		'transport'	=> 'smtp',
+		'options'	=> array
+						(
+							'hostname'	=> 'thewebapp.com',
+							'username'	=> 'mailer@thewebapp.com',
+							'password'	=> 'p@ssw0rd',
+							'port'		=> '25',
+						),
+	)
 );
 

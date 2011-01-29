@@ -3,7 +3,7 @@ Basic Usage:
 1. Customize the congfiguration setting in /config/mailer.php
 return array
 (
-	'default' => array(
+	'production' => array(
 		'transport'	=> 'smtp',
 		'options'	=> array
 						(
@@ -12,6 +12,15 @@ return array
 							'password'	=> 'password',
 							'encryption'=> 'ssl',
 							'port'		=> '465',
+						),
+	),
+	'development' => array(
+		'transport'	=> 'smtp',
+		'options'	=> array
+						(
+							'hostname'	=> 'localhost',
+							'username'	=> 'root@theweapp.com',
+							'port'		=> '25',
 						),
 	)
 );
@@ -22,6 +31,12 @@ return array
 
 class Mailer_User extends Mailer {
 
+	publci function before()
+	{
+		// To set the config by environment
+		$this->config		= Kohana::$environment;
+	}
+
 	public function welcome($args) 
 	{
 		$this->to 			= array('tom@example.com' => 'Tom');
@@ -29,7 +44,7 @@ class Mailer_User extends Mailer {
 		$this->from 		= array('theteam@theweapp.com' => 'The Team');
 		$this->subject		= 'Welcome!';
 		$this->attachments	= array('/path/to/file/file.txt', '/path/to/file/file2.txt');
-		$this->data 	= $args;
+		$this->data 		= $args;
 	}
 
 }
@@ -62,7 +77,18 @@ public function action_submit()
 	//you can also pass arguments to the mailer
 	Mailer::factory('user')->send_welcome($data);
 	
+	//you can also use instance
+	Mailer::instance('user')->send_welcome($data);
+	
 	//you can also pass arguments in factory
 	Mailer::factory('user', 'welcome', $data);
+	
+	//you can also send direct from the controller
+	Mailer::instance()
+		->to('du@kanema.com.br')
+		->from('eduardo.pacheco@w3haus.com.br')
+		->subject('Welcome!')
+		->html('Welcome!')
+		->send();
 }
 
