@@ -86,7 +86,7 @@ public function action_submit()
 	//you can also send direct from the controller
 	Mailer::instance()
 		->to('du@kanema.com.br')
-		->from('eduardo.pacheco@w3haus.com.br')
+		->from('du@kanema.com.br')
 		->subject('Welcome!')
 		->html('Welcome!')
 		->send();
