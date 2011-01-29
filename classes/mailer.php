@@ -114,16 +114,19 @@ class Mailer {
 			//see if the method exists	
 			if (method_exists($class, $method))
 			{
+				/*
 				if ( ! empty( $data[0] ) )
 				{
 					$data = ( is_array( $data[0] ) ) ? ( (object) $data[0] ) : $data[0];
 				};
+				*/
 				
 				//call the method
-				$class->$method( $data );
+				call_user_func_array( array( $class, $method ), array( $data ) );
+				// $class->$method( $data );
 				
 				//setup the message
-				$class->setup_message($method);
+				$class->setup_message( $method );
 				
 				//send the message
 				return $class->send();
