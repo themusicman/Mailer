@@ -13,7 +13,7 @@
  */
 
 //Load Swift utility class
-require_once dirname(__FILE__) . '/classes/Swift.php';
+require_once dirname(__FILE__) . '/Swift.php';
 
 //Start the autoloader
 Swift::registerAutoload();

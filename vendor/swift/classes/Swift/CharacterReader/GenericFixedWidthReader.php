@@ -1,21 +1,11 @@
 <?php
 
 /*
- Provides fixed-width byte sizes for reading fixed-width character sets.
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+ * This file is part of SwiftMailer.
+ * (c) 2004-2009 Chris Corbyn
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 //@require 'Swift/CharacterReader.php';
@@ -25,18 +15,19 @@
  * @package Swift
  * @subpackage Encoder
  * @author Chris Corbyn
+ * @author Xavier De Cock <xdecock@gmail.com>
  */
 class Swift_CharacterReader_GenericFixedWidthReader
   implements Swift_CharacterReader
 {
-
+   
   /**
    * The number of bytes in a single character.
    * @var int
    * @access private
    */
   private $_width;
-
+	
   /**
    * Creates a new GenericFixedWidthReader using $width bytes per character.
    * @param int $width
@@ -44,6 +35,35 @@ class Swift_CharacterReader_GenericFixedWidthReader
   public function __construct($width)
   {
     $this->_width = $width;
+  }
+
+  /**
+   * Returns the complete charactermap
+   *
+   * @param string $string
+   * @param int $startOffset
+   * @param array $currentMap
+   * @param mixed $ignoredChars
+   * @return $int
+   */
+  public function getCharPositions($string, $startOffset, &$currentMap, &$ignoredChars)
+  {
+  	$strlen = strlen($string);
+  	// % and / are CPU intensive, so, maybe find a better way
+  	$ignored = $strlen%$this->_width;
+  	$ignoredChars = substr($string, - $ignored);
+  	$currentMap = $this->_width;
+  	return ($strlen - $ignored)/$this->_width;
+  	
+  }
+  
+  /**
+   * Returns mapType
+   * @int mapType
+   */
+  public function getMapType()
+  {
+  	return self::MAP_TYPE_FIXED_LEN;
   }
 
   /**

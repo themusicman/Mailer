@@ -1,21 +1,11 @@
 <?php
 
 /*
- Bi-Directional ByteStream using an array in Swift Mailer.
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+ * This file is part of SwiftMailer.
+ * (c) 2004-2009 Chris Corbyn
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 //@require 'Swift/InputByteStream.php';
@@ -112,8 +102,11 @@ class Swift_ByteStream_ArrayByteStream
   public function write($bytes)
   {
     $to_add = str_split($bytes);
-    array_unshift($to_add, &$this->_array);
-    $this->_arraySize = call_user_func_array('array_push', $to_add);
+    foreach ($to_add as $value)
+    {
+      $this->_array[] = $value;
+    }
+    $this->_arraySize = count($this->_array);
     
     foreach ($this->_mirrors as $stream)
     {

@@ -1,21 +1,11 @@
 <?php
 
 /*
- A base Mime entity in Swift Mailer.
- 
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+ * This file is part of SwiftMailer.
+ * (c) 2004-2009 Chris Corbyn
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 //@require 'Swift/Mime/HeaderSet.php';
@@ -122,7 +112,8 @@ class Swift_Mime_SimpleMimeEntity implements Swift_Mime_MimeEntity
           )
         )
       );
-    $this->generateId();
+
+    $this->_id = $this->getRandomId();
   }
   
   /**
@@ -131,12 +122,8 @@ class Swift_Mime_SimpleMimeEntity implements Swift_Mime_MimeEntity
    */
   public function generateId()
   {
-    $idLeft = time() . '.' . uniqid();
-    $idRight = !empty($_SERVER['SERVER_NAME'])
-      ? $_SERVER['SERVER_NAME']
-      : 'swift.generated';
-    $this->_id = $idLeft . '@' . $idRight;
-    return $this->getId();
+    $this->setId($this->getRandomId());
+    return $this->_id;
   }
   
   /**
@@ -482,6 +469,18 @@ class Swift_Mime_SimpleMimeEntity implements Swift_Mime_MimeEntity
   }
   
   /**
+   * Returns a string representation of this object.
+   *
+   * @return string
+   *
+   * @see toString()
+   */
+  public function __toString()
+  {
+    return $this->toString();
+  }
+  
+  /**
    * Write this entire entity to a {@link Swift_InputByteStream}.
    * @param Swift_InputByteStream
    */
@@ -640,6 +639,19 @@ class Swift_Mime_SimpleMimeEntity implements Swift_Mime_MimeEntity
     $this->_cache->clearKey($this->_cacheKey, 'body');
   }
   
+  /**
+   * Returns a random Content-ID or Message-ID.
+   * @return string
+   */
+  protected function getRandomId()
+  {
+    $idLeft = time() . '.' . uniqid();
+    $idRight = !empty($_SERVER['SERVER_NAME'])
+      ? $_SERVER['SERVER_NAME']
+      : 'swift.generated';
+    return $idLeft . '@' . $idRight;
+  }
+  
   // -- Private methods
   
   private function _readStream(Swift_OutputByteStream $os)
@@ -666,7 +678,7 @@ class Swift_Mime_SimpleMimeEntity implements Swift_Mime_MimeEntity
       '/^[a-z0-9\'\(\)\+_\-,\.\/:=\?\ ]{0,69}[a-z0-9\'\(\)\+_\-,\.\/:=\?]$/Di',
       $boundary))
     {
-      throw new Exception('Mime boundary set is not RFC 2046 compliant.');
+      throw new Swift_RfcComplianceException('Mime boundary set is not RFC 2046 compliant.');
     }
   }
   
