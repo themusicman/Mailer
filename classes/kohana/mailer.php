@@ -157,7 +157,7 @@ class Kohana_Mailer {
 	 **/
 	public static function factory( $mailer_name = NULL, $method = NULL, $data = array() )
 	{
-		$class = ( $mailer_name = NULL ) ? 'Mailer_'.ucfirst($mailer_name) : 'Mailer';
+		$class = ( $mailer_name !== NULL ) ? 'Mailer_'.ucfirst($mailer_name) : 'Mailer';
 		$class = new $class;
 		
 		if ( $method === NULL )
