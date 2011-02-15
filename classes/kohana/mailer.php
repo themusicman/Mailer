@@ -234,12 +234,12 @@ class Kohana_Mailer {
 				
 				//Create the Transport
 				$transport = Swift_SmtpTransport::newInstance()
-								->setHost(empty($config['hostname']) ? NULL : (string) $config['hostname'])
+								->setHost(empty($config['hostname']) ? "localhost" : (string) $config['hostname'])
 								->setUsername(empty($config['username']) ? NULL : (string) $config['username'])
 								->setPassword(empty($config['password']) ? NULL : (string) $config['password']);
 				
 				//Port?
-				$port = empty($config['port']) ? NULL : (int) $config['port'];
+				$port = empty($config['port']) ? 25 : (int) $config['port'];
 				$transport->setPort($port);
 				
 				//Use encryption?
