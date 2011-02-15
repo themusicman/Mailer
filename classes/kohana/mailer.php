@@ -200,9 +200,10 @@ class Kohana_Mailer {
 	 * @return Mailer
 	 * 
 	 **/
-	public static function instance( $mailer_name = NULL ) 
+	public static function instance( $mailer_name = NULL, $config = "default" ) 
 	{
 		$className = ( $mailer_name !== NULL) ? 'Mailer_'.ucfirst($mailer_name) : "Mailer";
+		$this->config = $config;
 		
 		if ( ! isset( self::$instances[$className] ) )
 		{
