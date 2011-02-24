@@ -85,6 +85,12 @@ class Kohana_Mailer {
     protected $config = "default";
 
     /**
+	* Mailer DebugMode
+	* @var bool
+	*/
+    protected $debug = FALSE;
+
+    /**
 	* Mailer Method
 	* @var string
 	*/
@@ -167,13 +173,6 @@ class Kohana_Mailer {
 			//see if the method exists	
 			if (method_exists($class, $method))
 			{
-				/*
-				if ( ! empty( $data[0] ) )
-				{
-					$data = ( is_array( $data[0] ) ) ? ( (object) $data[0] ) : $data[0];
-				};
-				*/
-				
 				//call the method
 				call_user_func_array( array( $class, $method ), array( $data ) );
 				// $class->$method( $data );
@@ -203,13 +202,12 @@ class Kohana_Mailer {
 	public static function instance( $mailer_name = NULL, $config = "default" ) 
 	{
 		$className = ( $mailer_name !== NULL) ? 'Mailer_'.ucfirst($mailer_name) : "Mailer";
-		$this->config = $config;
 		
 		if ( ! isset( self::$instances[$className] ) )
 		{
 			self::$instances[$className] = new $className;
 		};
-		return self::$instances[$className];
+		return self::$instances[$className]->config($config);
 	}
 	
 		
@@ -276,7 +274,7 @@ class Kohana_Mailer {
 	 **/
 	public function __call($name, $args = array())
 	{
-		$pattern = '/^(type|from|to|cc|bcc|subject|data|attachments|batch_send|config|html|text)$/i';
+		$pattern = '/^(type|from|to|cc|bcc|subject|data|attachments|batch_send|config|html|text|debug)$/i';
 		if ( isset($args[0]) && is_array( $args[0] ) )
 		{
 			foreach ($args[0] as $key => $value)
@@ -438,16 +436,26 @@ class Kohana_Mailer {
 		};
 	
 		$this->connect( $this->config );
-		//should we batch send or not?
-		if ( ! $this->batch_send)
-		{
-			//Send the message
-			$this->result = $this->_mailer->send($this->message);
-		}
-		else
-		{	
-			$this->result = $this->_mailer->batchSend($this->message);
-		}
+		
+		try {
+			//should we batch send or not?
+			if ( ! $this->batch_send)
+			{
+				//Send the message
+				$this->result = $this->_mailer->send($this->message);
+			}
+			else
+			{
+				$this->result = $this->_mailer->batchSend($this->message);
+			}
+		} catch (Exception $e) {
+			return false;
+			if ( self::$debug ) {
+				throw new Kohana_Exception('Server is not responding');
+			} else {
+				return false;
+			};
+		};
 		
 		$this->after();
 		return $this->result;
