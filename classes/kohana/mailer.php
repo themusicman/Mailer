@@ -224,44 +224,14 @@ class Kohana_Mailer {
 		// Load configuration
 		$config = Kohana::config('mailer.'.$config);
 
-		$transport = $config['transport'];
+		$transport = ( is_null( $config['transport'] ) ) ? 'native' : $config['transport'];
 		$config = $config['options'];
-		
-		switch ( $transport )
-		{
-			case 'smtp':
-				
-				//Create the Transport
-				$transport = Swift_SmtpTransport::newInstance()
-								->setHost(empty($config['hostname']) ? "localhost" : (string) $config['hostname'])
-								->setUsername(empty($config['username']) ? NULL : (string) $config['username'])
-								->setPassword(empty($config['password']) ? NULL : (string) $config['password']);
-				
-				//Port?
-				$port = empty($config['port']) ? 25 : (int) $config['port'];
-				$transport->setPort($port);
-				
-				//Use encryption?
-				if (! empty($config['encryption']))
-				{
-					$transport->setEncryption($config['encryption']);
-				}
-				
-			break;
-			
-			case 'sendmail':
-				// Create a sendmail connection
-				$transport = Swift_SendmailTransport::newInstance(empty($config['options']) ? "/usr/sbin/sendmail -bs" : $config['options']);
-			break;
-			
-			default:
-				// Use the native connection
-				$transport = Swift_MailTransport::newInstance($config['options']);
-			break;
-		}
 
-		//Create the Mailer using the appropriate transport
-		return $this->_mailer = Swift_Mailer::newInstance($transport);
+		$klass = 'Mailer_Transport_' . ucfirst($transport);
+		$factory = new $klass();
+
+		//Create the Mailer
+		return $this->_mailer = Swift_Mailer::newInstance($factory->build($config));
 	}
 
 	/**
