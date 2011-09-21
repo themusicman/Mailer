@@ -26,7 +26,7 @@ Basic Usage:
 
 	class Mailer_User extends Mailer {
 
-		publci function before()
+		public function before()
 		{
 			// To set the config by environment
 			$this->config		= Kohana::$environment;
