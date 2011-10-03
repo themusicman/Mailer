@@ -419,9 +419,8 @@ class Kohana_Mailer {
 				$this->result = $this->_mailer->batchSend($this->message);
 			}
 		} catch (Exception $e) {
-			return false;
-			if ( self::$debug ) {
-				throw new Kohana_Exception('Server is not responding');
+			if ( Kohana::$environment != Kohana::PRODUCTION ) {
+				throw new Kohana_Exception( $e->getMessage() );
 			} else {
 				return false;
 			};
