@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 /**
  * SwiftMailer transports
  *
@@ -16,18 +18,17 @@
  * @param   array   smtp: hostname, username, password, port, encryption (optional)
  *
  */
-
 return array
-(
-	'default' => array(
-		'transport'	=> 'smtp',
-		'options'	=> array
-						(
-							'hostname'	=> 'thewebapp.com',
-							'username'	=> 'mailer@thewebapp.com',
-							'password'	=> 'p@ssw0rd',
-							'port'		=> '25',
-						),
-	)
+    (
+    'default' => array(
+        'transport' => 'smtp',
+        'options' => array
+            (
+            'hostname' => 'thewebapp.com',
+            'username' => 'mailer@thewebapp.com',
+            'password' => 'p@ssw0rd',
+            'port' => '25',
+        ),
+    )
 );
 
