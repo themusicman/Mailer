@@ -19,6 +19,7 @@ Basic Usage:
 			'transport'	=> 'smtp'
 		)
 	);
+        ?>
 
 
 2. Create a class that extends the Mailer class and save it to /classes/mailer/class_name.php (Minus the Mailer_)
@@ -43,6 +44,7 @@ Basic Usage:
 		}
 
 	}
+        ?>
 
 
 3. Create the view for the email and save it to /views/mailer/class_name/method_name.php (Minus the Mailer_)
