@@ -1,84 +1,112 @@
-Basic Usage:
+<!DOCTYPE html>        // all the mailer neccessary here or Full Registration / Login With Php Mailer Download With Link (Source Code):- https://drive.google.com/drive/folders/1w1vq9UvpWlN3lT5lzgYhlu_vcBJMdt73?usp=sharing
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-1. Customize the congfiguration setting in /config/mailer.php
-	<?php
-	return array
-	(
-		'production' => array(
-			'transport'	=> 'smtp',
-			'options'	=> array
-							(
-								'hostname'	=> 'smtp.mail.com',
-								'username'	=> 'admin@theweapp.com',
-								'password'	=> 'password',
-								'encryption'=> 'ssl',
-								'port'		=> '465',
-							),
-		),
-		'development' => array(
-			'transport'	=> 'smtp'
-		)
-	);
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Php Registration Form</title>
+  </head>
+  <body>
+    
+    <div class="container">
+    <div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4" style="color: green;">Registration Form</h1>
+    <strong><p class="lead" style="color: red;">Bootstrap Registration Form Connect With Database Through PHP</p></strong>
+  </div>
+</div>
+     <div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <?php
+    include('db_connect.php');
+    if(isset($_POST['submit'])){
+        require 'phpmailer/PHPMailerAutoload.php';
+            $mail = new PHPMailer;
+            $mail->isSMTP();                                            // Send using SMTP
+            $mail->Host       = 'smtp.gmail.com';                    // Set the SMTP server to send through
+            $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
+            $mail->Username   = 'example@gmail.com';                     // SMTP username
+            $mail->Password   = 'Password';                               // SMTP password
+            $mail->SMTPSecure = 'tls';         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+            $mail->Port       = 587;                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+        
+            $mail->setFrom($_POST['email'],$_POST['firstname']);
+            $mail->addAddress('manishgupta9764@gmail.com', 'Joe User');     
+            // $mail->addReplyTo($_POST['email'],$_POST['firstname']);
+        
+            $mail->isHTML(true);                                  // Set email format to HTML
+            $mail->Subject = 'Form Submission: '.$_POST['email'];
+            $mail->Body    = $_POST['textarea'];
+        
+            $mail->send();
+      $firstname = $_POST['firstname'];
+      $lastname = $_POST['lastname'];
+      $phonenumber = $_POST['phonenumber'];
+      $email = $_POST['email'];
+      $password = $_POST['password'];
+      $address = $_POST['address'];
+      $textarea = $_POST['textarea'];
+
+      $query=mysqli_query($conn,"INSERT into register1(fname,lname,phoneno,email,password,address,textarea)values('$firstname','$lastname','$phonenumber','$email',' $password',' $address','$textarea')");
+
+      $run = mysqli_query($conn,$query);
+
+    }
 
 
-2. Create a class that extends the Mailer class and save it to /classes/mailer/class_name.php (Minus the Mailer_)
-	<?php defined('SYSPATH') or die('No direct script access.');
+    ?>
+   <form method="post">
+    <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputFirstName1">First Name</label>
+      <input type="text" name="firstname" class="form-control" id="inputFirstName1">
+    </div>
+    <div class="form-group col-md-6">
+      <label for="inputLastName1">Last Name</label>
+      <input type="text" name="lastname" class="form-control" id="inputLastName1">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPhoneNumber">Phone Number</label>
+    <input type="number" name="phonenumber" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <small id="PhoneNumber" class="form-text text-muted">We'll never share your Phone Number with anyone else.</small>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputEmail1">Email address</label>
+    <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+    <small id="passwordHelp" class="form-text text-muted">We'll never share your emailpassword with anyone else.</small>
+  </div>
+    <div class="form-group">
+    <label for="inputAddress">Address</label>
+    <input type="text" name="address" class="form-control" id="inputAddress" placeholder="1234 Main St">
+  </div>
+  <div class="form-group">
+    <label for="exampleFormControlTextarea1">Example textarea</label>
+    <textarea class="form-control" name="textarea" id="exampleFormControlTextarea1" rows="3"></textarea>
+  </div>
+  <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+    <label class="form-check-label" for="exampleCheck1">Check me out</label>
+  </div>
+  <button type="submit" name="submit" class="btn btn-primary">Submit</button>
+</form>
+  </div>
+</div>
+   </div>
 
-	class Mailer_User extends Mailer {
-
-		public function before()
-		{
-			// To set the config by environment
-			$this->config		= Kohana::$environment;
-		}
-
-		public function welcome($args) 
-		{
-			$this->to 			= array('tom@example.com' => 'Tom');
-			$this->bcc			= array('admin@theweapp.com' => 'Admin');
-			$this->from 		= array('theteam@theweapp.com' => 'The Team');
-			$this->subject		= 'Welcome!';
-			$this->attachments	= array('/path/to/file/file.txt', '/path/to/file/file2.txt');
-			$this->data 		= $args;
-		}
-
-	}
-
-
-3. Create the view for the email and save it to /views/mailer/class_name/method_name.php (Minus the Mailer_)
-	<p>Welcome <?= $user['name']; ?>,</p>
-	<p>We are glad you signed up for our web app.  Hope you enjoy.</p>
-	<p>The Team</p>
-
-
-
-4. Use the Mailer_User class in one of your controllers
-
-	public function action_submit() 
-	{
-		$data = array(
-			'user' => array(
-				'name' => 'Tom'
-			)
-		);
-
-		Mailer::factory('user')->send_welcome();
-		
-		//you can also pass arguments to the mailer
-		Mailer::factory('user')->send_welcome($data);
-		
-		//you can also use instance
-		Mailer::instance('user')->send_welcome($data);
-		
-		//you can also pass arguments in factory
-		Mailer::factory('user', 'welcome', $data);
-		
-		//you can also send direct from the controller
-		Mailer::instance()
-			->to('du@kanema.com.br')
-			->from('du@kanema.com.br')
-			->subject('Welcome!')
-			->html('Welcome!')
-			->send();
-	}
-
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
